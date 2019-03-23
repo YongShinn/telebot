@@ -10,7 +10,7 @@ from telebot import types
 import scrape
 from threading import Thread
 
-TOKEN = '788731481:AAF30CxdR5WM5uZGTCKzAAzpySlTTPZN4C'
+TOKEN = '756019399:AAHQ7u2zq_JHdf_bODDdwRUOFeW923qRquo'
 
 bubbletype = 'asd'
 
@@ -218,7 +218,7 @@ def create_screenshot_Size(message):
             size1 = message.text
             Customeritem[4] = size1
             print(Customeritem[4])
-            msg = bot.reply_to(message, """Color?\n(NA if not applicable""")
+            msg = bot.reply_to(message, """Color?\n(NA if not applicable)""")
             bot.register_next_step_handler(msg, create_screenshot_Color) # display msg and jumping to next function
     except Exception as e:
         bot.reply_to(message, 'oooops')
@@ -292,13 +292,11 @@ def create_confirm(message):
         if (bubbletype == 'Public'):
             markup7 = types.ReplyKeyboardMarkup(row_width=1, one_time_keyboard=True)
             itembtn1 = types.KeyboardButton('UTown')
-            itembtn2 = types.KeyboardButton('Sheares')
-            itembtn3 = types.KeyboardButton('Kent Ridge')
-            markup7.add(itembtn1, itembtn2, itembtn3)
+            itembtn2 = types.KeyboardButton('CLB')
+            markup7.add(itembtn1, itembtn2)
             msg = bot.reply_to(message, """Aweasome, can we know where you want your items delivered to? 
 Utown: Delivery will be done to cheers 
-Sheares: SH Lobby
-KR: KR Lobby""", reply_markup=markup7)
+CLB: Central Library""", reply_markup=markup7)
             bot.register_next_step_handler(msg, create_location) # display msg and jumping to next function
         elif (bubbletype == 'Private'):
             msg = bot.reply_to(message, "Aweasome, can we know where you want your items deliverd to?")
@@ -460,7 +458,7 @@ def join_qty(message):
             itembtn6 = types.KeyboardButton('Cancel')
             markup12.add(itembtn1, itembtn2, itembtn3,
                          itembtn4, itembtn5, itembtn6)
-            msg = bot.reply_to(message, """Size? (Please type out the your size if it's not available in the button)""", reply_markup=markup12)
+            msg = bot.reply_to(message, """Size?\n(Please type out the your size if it's not available in the button)""", reply_markup=markup12)
             bot.register_next_step_handler(msg, join_size)
     except Exception as e:
         bot.reply_to(message, 'oooops')
@@ -594,24 +592,30 @@ def edit_choice(m):
     try:
         cid = m.chat.id
         PTN = m.text
-        Edititem[0] = PTN
-        print(Edititem[0])
-        Edititem[2] = database.edit_get_item(Edititem[0])
-        print(((Edititem[2])[0])[1])
-        count = 1
-        send_msg = """Which item do you want to edit?
+        if m.text == 'Cancel':
+            Thread(target=command_start(message)).start()
+        else:
+            PTN = m.text
+            Edititem[0] = PTN
+            print(Edititem[0])
+            Edititem[2] = database.edit_get_item(Edititem[0])
+            print(((Edititem[2])[0])[1])
+            count = 1
+            send_msg = """Which item do you want to edit?
 """
-        for x in Edititem[2]:
-            send_msg = send_msg + str(count) + ")" + x[1]+"\n"
-            count = count + 1
-        markup16 = types.ReplyKeyboardMarkup(
-            row_width=1, one_time_keyboard=True)
-        itembtn1 = types.KeyboardButton('1')
-        itembtn2 = types.KeyboardButton('2')
-        itembtn3 = types.KeyboardButton('3')
-        markup16.add(itembtn1, itembtn2, itembtn3)
-        msg = bot.reply_to(m, send_msg, reply_markup=markup16)
-        bot.register_next_step_handler(msg, edit_properties)
+            for x in Edititem[2]:
+                send_msg = send_msg + str(count) + ")" + x[1]+"\n"
+                count = count + 1
+            markup16 = types.ReplyKeyboardMarkup(row_width=1, one_time_keyboard=True)
+            itembtn1 = types.KeyboardButton('1')
+            itembtn2 = types.KeyboardButton('2')
+            itembtn3 = types.KeyboardButton('3')
+            itembtn4 = types.KeyboardButton('4')
+            itembtn5 = types.KeyboardButton('5')
+            itembtn6 = types.KeyboardButton('Cancel')
+            markup16.add(itembtn1, itembtn2, itembtn3, itembtn4, itembtn5, itembtn6)
+            msg = bot.reply_to(m, send_msg, reply_markup=markup16)
+            bot.register_next_step_handler(msg, edit_properties)
     except Exception as e:
         bot.reply_to(m, 'oooops')
 
@@ -619,19 +623,22 @@ def edit_choice(m):
 def edit_properties(m):
     try:
         cid = m.chat.id
-        choice = m.text
-        Edititem[3] = choice
-        print(choice)
-        markup17 = types.ReplyKeyboardMarkup(
-            row_width=1, one_time_keyboard=True)
-        itembtn1 = types.KeyboardButton('Quantity')
-        itembtn2 = types.KeyboardButton('Size')
-        itembtn3 = types.KeyboardButton('Colour')
-        itembtn4 = types.KeyboardButton('Delete')
-        markup17.add(itembtn1, itembtn2, itembtn3, itembtn4)
-        msg = bot.reply_to(
-            m, """Which properties you want to change?""", reply_markup=markup17)
-        bot.register_next_step_handler(msg, edit_changes)
+        if m.text == 'Cancel':
+            Thread(target=command_start(message)).start()
+        else:
+            choice = m.text
+            Edititem[3] = choice
+            print(choice)
+            markup17 = types.ReplyKeyboardMarkup(row_width=1, one_time_keyboard=True)
+            itembtn1 = types.KeyboardButton('Quantity')
+            itembtn2 = types.KeyboardButton('Size')
+            itembtn3 = types.KeyboardButton('Colour')
+            itembtn4 = types.KeyboardButton('Delete')
+            itembtn5 = types.KeyboardButton('Cancel')
+            markup17.add(itembtn1, itembtn2, itembtn3, itembtn4, itembtn5)
+            msg = bot.reply_to(
+                m, """Which properties you want to change?""", reply_markup=markup17)
+            bot.register_next_step_handler(msg, edit_changes)
     except Exception as e:
         bot.reply_to(m, 'oooops')
 
@@ -639,11 +646,14 @@ def edit_properties(m):
 def edit_changes(m):
     try:
         cid = m.chat.id
-        properties = m.text
-        Edititem[4] = properties
-        print(properties)
-        msg = bot.reply_to(m, """The changes would be?""")
-        bot.register_next_step_handler(msg, edit_end)
+        if m.text == 'Cancel':
+            Thread(target=command_start(message)).start()
+        else:
+            properties = m.text
+            Edititem[4] = properties
+            print(properties)
+            msg = bot.reply_to(m, """The changes would be?""")
+            bot.register_next_step_handler(msg, edit_end)
     except Exception as e:
         bot.reply_to(m, 'oooops')
 
