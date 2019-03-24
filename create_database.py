@@ -28,12 +28,15 @@ c.execute('''CREATE TABLE IF NOT EXISTS users (
     telegram_handle VARCHAR(255) NOT NULL, 
     first_name VARCHAR(255) NOT NULL, 
     address VARCHAR(255) NULL,
-    latest_stage TINYINT UNSIGNED DEFAULT 0,
-    highest_stage TINYINT UNSIGNED DEFAULT 0,
+    latest_stage TINYINT UNSIGNED,
+    highest_stage TINYINT UNSIGNED,
     created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
-    last_update TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP,
+    last_update TIMESTAMP NULL,
     UNIQUE (chat_id)
 )''')
+
+#stage DEFAULT 0
+#last_update TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP
 
 # Create retailers table 
 c.execute('''CREATE TABLE IF NOT EXISTS retailers (
@@ -54,17 +57,19 @@ c.execute('''CREATE TABLE IF NOT EXISTS bubbles (
     user_id INT(11) UNSIGNED, 
     cart_amount DECIMAL(8,2) UNSIGNED NOT NULL DEFAULT 0, 
     bubble_type VARCHAR(255), 
-    created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP NULL,
     filled_date TIMESTAMP NULL, 
     paid_date TIMESTAMP NULL, 
     ordered_date TIMESTAMP NULL, 
     received_shipment_date TIMESTAMP NULL, 
     delivered_date TIMESTAMP NULL, 
-    last_update TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP,
+    last_update TIMESTAMP NULL,
     FOREIGN KEY (retailer_id) REFERENCES retailers(retailer_id),
     FOREIGN KEY (user_id) REFERENCES users(user_id),
     unique (ucn)    
 )''')  
+
+#created at DEFAULT CURRENT_TIMESTAMP
 
 # Create items table
 c.execute('''CREATE TABLE IF NOT EXISTS items (
@@ -78,7 +83,7 @@ c.execute('''CREATE TABLE IF NOT EXISTS items (
     quantity SMALLINT UNSIGNED,
     total_price DECIMAL(8,2) UNSIGNED,
     created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
-    last_update TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP,
+    last_update TIMESTAMP NULL,
     FOREIGN KEY (retailer_id) REFERENCES retailers(retailer_id)
 )''')
 

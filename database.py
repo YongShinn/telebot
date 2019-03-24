@@ -126,6 +126,7 @@ def add_bubble(retailer_id, user_id, bubble_type):
         acronym = c.fetchone()[0]
         c.execute("SELECT user_id FROM users WHERE user_id = %s LIMIT 1", (user_id,))
         c.fetchone()[0]
+        print('acronym',acronym)
 
         # generate UCN and add new row
         ucn = ''.join([random.choice(string.ascii_letters + string.digits) for n in range(4)]) 
@@ -135,6 +136,7 @@ def add_bubble(retailer_id, user_id, bubble_type):
         elif bubble_type == 'Public':
             ucn_last = 'PUB'
         ucn = acronym + ucn + ucn_last   
+        print('ucn: ',ucn)
         query = 'INSERT INTO bubbles (ucn, retailer_id, user_id, bubble_type) VALUES (%s, %s, %s, %s)'
         values = (ucn, retailer_id, user_id, bubble_type)
         c.execute(query, values)
@@ -178,7 +180,7 @@ def add_order(bubble_id, user_id, item_id, shipping_location):
                     INNER JOIN retailers USING (retailer_id) 
                     WHERE bubble_id = %s LIMIT 1''', (bubble_id,))
         acronym, bubble_creator_id, bubble_type = c.fetchone()
-        print(bubble_type)
+        print('bubble type',bubble_type)
         ptn = ''.join([random.choice(string.ascii_letters + string.digits) for n in range(4)])
         ptn_last = ''
         if bubble_type == 'Private':
@@ -199,7 +201,8 @@ def add_order(bubble_id, user_id, item_id, shipping_location):
                 ptn_last = 'UT'
             if shipping_location == 'CLB':
                 ptn_last = 'CLB' 
-        ptn = acronym + ptn + ptn_last       
+        ptn = acronym + ptn + ptn_last  
+        print('ptn:', ptn)     
         query = 'INSERT INTO orders (bubble_id, user_id, item_id, ptn, shipping_location) VALUES (%s, %s, %s, %s, %s)'
         values = (bubble_id, user_id, item_id, ptn, shipping_location)        
         c.execute(query, values)
@@ -445,14 +448,14 @@ add_retailer('The Tinsel Rack', 'TTR', 'https://www.thetinselrack.com/', 100)
 add_retailer('Abercrombie And Fitch', 'ANF', 'https://www.abercrombie.sg/en_SG/home', 160)
 add_retailer('Myprotein', 'MPT', 'https://www.myprotein.com.sg/', 100)
 
-#print(add_bubble(6, 1, 'Private'))                            #retailer_id, user_id, bubble_type
+#print(add_bubble(1, 1, 'Private'))                            #retailer_id, user_id, bubble_type
 
-#print(add_item(6, 'www.blah1.com', 'purple tee', 20, 'EU 34', 'purple', 2))    #retailer_id, web_link, name, unit_price, size, color, quantity
-#print(add_item(6, 'www.blah2.com', 'purple tee', 15, 'EU 34', 'purple', 3))
+#print(add_item(1, 'www.blah1.com', 'purple tee', 20, 'EU 34', 'purple', 2))    #retailer_id, web_link, name, unit_price, size, color, quantity
+#print(add_item(1, 'www.blah2.com', 'purple tee', 15, 'EU 34', 'purple', 3))
 
-#print(add_order(1, 2, 2, 'UTown'))                            #bubble_id, user_id, item_id, shipping_location
+#print(add_order(1, 1, 1, 'pasir ris'))                            #bubble_id, user_id, item_id, shipping_location
 
-#print(retrieve_bubble('ANFrpO5PUB'))                          #ucn
+#print(retrieve_bubble('UNQ3qIaPRI'))                          #ucn
 
 #print(edit_get_item('ANFwISVCLB'))                            #ptn
 
