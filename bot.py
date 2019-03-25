@@ -518,7 +518,7 @@ def join_confirm(message):
         chat_id = message.chat.id
         confirmation = message.text
         if (confirmation == 'Yes'):
-            Backend_stuff[0] = database.add_user(message.chat.first_name)
+            Backend_stuff[0] = database.add_user(chat_id, message.chat.username, message.chat.first_name)
             print(Backend_stuff[0])
             Backend_stuff[2], Backend_stuff[1] = database.retrieve_bubble(
                 Joinitem[0])
@@ -527,7 +527,7 @@ def join_confirm(message):
                 Backend_stuff[1], Joinitem[1], Joinitem[5], Joinitem[8], Joinitem[3], Joinitem[4], int(Joinitem[2]))
             print(Backend_stuff[4])
             Backend_stuff[5] = database.add_order(
-                Backend_stuff[2], Backend_stuff[0], Backend_stuff[4])
+                Backend_stuff[2], Backend_stuff[0], Backend_stuff[4], (Joinitem[0])[7:])
             print(Backend_stuff[5])
             markup15 = types.ReplyKeyboardMarkup(
                 row_width=1, one_time_keyboard=True)
