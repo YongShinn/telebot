@@ -3,6 +3,7 @@ import mysql.connector as mysql
 import random
 import string
 import requests
+import time
 from collections import defaultdict
 
 db = mysql.connect(
@@ -11,7 +12,6 @@ db = mysql.connect(
     passwd = settings.passwd,
     database = settings.database
 )
-
 c = db.cursor()
 
 def bot_sendtext(bot_chatID, bot_message):
@@ -20,7 +20,10 @@ def bot_sendtext(bot_chatID, bot_message):
         bot_token = settings.notification_bot_token
         send_text = 'https://api.telegram.org/bot' + bot_token + '/sendMessage?chat_id=' + str(bot_chatID) + '&parse_mode=Markdown&text=' + bot_message 
         requests.get(send_text)
-    except:
+        print("sending text to admin successful")
+    except Exception as err:
+        print("sending text to admin unsuccessful")
+        print(err)
         return False
 
 def bubble_full_request_payment(bubble_id):
@@ -54,9 +57,12 @@ def bubble_full_request_payment(bubble_id):
             bot_message += f"Please make payment of {total_price_to_pay} to 9123123123 by PayLah!"
             print(bot_message)
             bot_sendtext(bot_chatID, bot_message)
-
+        
+        print("bubble_full_request_payment successful")
         return True 
-    except:
+    except Exception as err:
+        print("bubble_full_request_payment unsuccessful")
+        print(err)
         return False
 
 def bubble_full(bubble_id):
@@ -76,22 +82,28 @@ def bubble_full(bubble_id):
                 bubble_full_request_payment(bubble_id)
             print("bubble full: " + str(cart_amount) + "/" + str(free_shipping_amount))    
             
+            print("bubble_full successful")
             return True
         else: 
             c.execute('UPDATE bubbles SET filled_date = NULL WHERE bubble_id = %s', (bubble_id,))
             db.commit()             
             print('bubble not full: ' + str(cart_amount) + "/" + str(free_shipping_amount))  
+
+            print("bubble_full unsuccessful")
             return False
-    except:
+    except Exception as err:
+        print("bubble_full unsuccessful")
+        print(err)
         return False
 
 def add_user(chat_id, telegram_handle, first_name):
     # Check if user exists
-    c.execute("SELECT user_id FROM users WHERE chat_id = %s LIMIT 1", (chat_id,))
     try:
+        c.execute("SELECT user_id FROM users WHERE chat_id = %s LIMIT 1", (chat_id,))
         # User exist
         user_id = c.fetchone()[0]
         print('user exists')
+        print("add_user sucessful")
     except:
         # User does not exist, add into users table
         query = 'INSERT INTO users (chat_id, telegram_handle, first_name) VALUES (%s, %s, %s)'
@@ -100,6 +112,7 @@ def add_user(chat_id, telegram_handle, first_name):
         db.commit()
         user_id = c.lastrowid
         print('user added')
+        print("add_user sucessful")
     
     return user_id 
 
@@ -109,6 +122,7 @@ def add_retailer(retailer_name, acronym, website, free_shipping_amount):
         c.execute("SELECT retailer_id FROM retailers WHERE website = %s LIMIT 1", (website,))        
         # Retailer exist
         retailer_id = c.fetchone()[0]
+        print("add_retailer successful")
     except:
         # Retailer does not exist, add into retailers table
         query = 'INSERT INTO retailers (retailer_name, acronym, website, free_shipping_amount) VALUES (%s, %s, %s, %s)'
@@ -116,6 +130,7 @@ def add_retailer(retailer_name, acronym, website, free_shipping_amount):
         c.execute(query, values)
         db.commit()
         retailer_id = c.lastrowid
+        print("add_retailer successful")
 
     return retailer_id 
     
@@ -144,8 +159,11 @@ def add_bubble(retailer_id, user_id, bubble_type):
         bubble_id = c.lastrowid
         print('bubble added')
 
+        print("add_bubble successful")
         return bubble_id, ucn
-    except:
+    except Exception as err:
+        print("add_bubble unsuccessful")
+        print(err)
         return False
 
 def add_item(retailer_id, web_link, item_name, unit_price, size, color, quantity):
@@ -162,9 +180,12 @@ def add_item(retailer_id, web_link, item_name, unit_price, size, color, quantity
         db.commit()
         print('item added')
         item_id = c.lastrowid
-    
+
+        print("add_item successful")
         return item_id 
-    except:
+    except Exception as err:
+        print("add_item unsuccessful")
+        print(err)
         return False
 
 def add_order(bubble_id, user_id, item_id, shipping_location):
@@ -213,9 +234,12 @@ def add_order(bubble_id, user_id, item_id, shipping_location):
         add_to_bubble_amount(bubble_id, item_id)
         bubble_full(bubble_id)
 
+        print("add_order successful")
         return ptn
-    except:
-        return False 
+    except Exception as err:
+        print("add_order unsuccessful")
+        print(err)
+        return False
 
 def recommend_brand(telegram_handle, brand):
     try:
@@ -224,8 +248,11 @@ def recommend_brand(telegram_handle, brand):
         c.execute('INSERT INTO recommendations (user_id, brand) VALUES (%s, %s)', (user_id, brand))
         db.commit()  
 
+        print("recommend_brand successful")
         return True
-    except:
+    except Exception as err:
+        print("recommend_brand unsuccessful")
+        print(err)
         return False
 
 def replace_ptn(ptn, bubble_id, user_id):
@@ -234,8 +261,11 @@ def replace_ptn(ptn, bubble_id, user_id):
         c.execute('UPDATE orders SET ptn = %s WHERE bubble_id = %s AND user_id = %s', (ptn, bubble_id, user_id))
         db.commit()
 
+        print("replce_ptn successful")
         return True 
-    except:
+    except Exception as err:
+        print("replce_ptn unsuccessful")
+        print(err)
         return False
 
 def retrieve_bubble(ucn):
@@ -244,8 +274,11 @@ def retrieve_bubble(ucn):
         c.execute('SELECT bubble_id, retailer_id FROM bubbles WHERE ucn = %s LIMIT 1', (ucn,))
         bubble_id, retailer_id = c.fetchone()
 
+        print("retrieve_bubble successful")
         return bubble_id, retailer_id
-    except:
+    except Exception as err:
+        print("retrieve_bubble unsuccessful")
+        print(err)
         return False
 
 def edit_get_item(ptn):
@@ -256,8 +289,11 @@ def edit_get_item(ptn):
                     WHERE ptn = %s''', (ptn,))
         item_list = c.fetchall()
 
+        print("edit_get_item successful")
         return item_list
-    except:
+    except Exception as err:
+        print("edit_get_item unsuccessful")
+        print(err)
         return False
 
 def edit_item(item_id, column_to_change, value_to_change):
@@ -333,8 +369,11 @@ def edit_item(item_id, column_to_change, value_to_change):
 
         db.commit()
 
+        print("edit_item successful")
         return True
-    except:
+    except Exception as err:
+        print("edit_item unsuccessful")
+        print(err)
         return False
 
 def add_to_bubble_amount(bubble_id, item_id):
@@ -347,8 +386,11 @@ def add_to_bubble_amount(bubble_id, item_id):
         c.execute('UPDATE bubbles SET cart_amount = cart_amount + %s WHERE bubble_id = %s', (total_price, bubble_id))
         db.commit()
 
+        print("add_to_bubble_amount successful")
         return True
-    except:
+    except Exception as err:
+        print("add_to_bubble_amount unsuccessful")
+        print(err)
         return False
 
 def query_joined_bubbles(telegram_handle):
@@ -362,9 +404,12 @@ def query_joined_bubbles(telegram_handle):
         # remove duplicates
         bubble_list = list(dict.fromkeys(bubble_list))
 
+        print("query_joined_bubbles successful")
         return bubble_list
-    except:
-        False
+    except Exception as err:
+        print("query_joined_bubbles unsuccessful")
+        print(err)
+        return False
 
 def query_bubble_status(ucn):
     try:
@@ -374,9 +419,12 @@ def query_bubble_status(ucn):
                     WHERE ucn = %s''', (ucn,))
         retailer_name, cart_amount, free_shipping_amount = c.fetchone()
 
+        print("query_bubble_status successful")
         return retailer_name, cart_amount, free_shipping_amount
-    except:
-        False
+    except Exception as err:
+        print("query_bubble_status unsuccessful")
+        print(err)
+        return False
 
 def query_items(telegram_handle):
     try:
@@ -389,9 +437,12 @@ def query_items(telegram_handle):
                     WHERE telegram_handle = %s''', (telegram_handle,))
         item_list = c.fetchall()
 
+        print("query_items successful")
         return item_list
-    except:
-        False
+    except Exception as err:
+        print("query_items unsuccessful")
+        print(err)
+        return False
 
 def update_stage(telegram_handle, latest_stage):
     try:
@@ -402,8 +453,11 @@ def update_stage(telegram_handle, latest_stage):
                     && telegram_handle = %s''', (latest_stage, telegram_handle))
         db.commit()
 
+        print("update_stage successful")
         return True
-    except:
+    except Exception as err:
+        print("update_stage unsuccessful")
+        print(err)
         return False
 
 def address_exist(telegram_handle):
@@ -413,8 +467,11 @@ def address_exist(telegram_handle):
         if address is None:
             return False
 
+        print("address_exist successful")
         return address
-    except:
+    except Exception as err:
+        print("address_exist unsuccessful")
+        print(err)
         return False
 
 def edit_address(telegram_handle, address):
@@ -422,8 +479,11 @@ def edit_address(telegram_handle, address):
         c.execute('UPDATE users SET address = %s WHERE telegram_handle = %s', (address, telegram_handle))
         db.commit()
 
+        print("edit_address successful")
         return True
-    except:
+    except Exception as err:
+        print("edit_address unsuccessful")
+        print(err)
         return False
 
 
