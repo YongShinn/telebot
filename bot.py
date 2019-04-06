@@ -4,13 +4,16 @@
 
 import time
 import database
+import settings
+import signal
+import sys
 
 import telebot
 from telebot import types
 import scrape
 from threading import Thread
 
-TOKEN = '756019399:AAHQ7u2zq_JHdf_bODDdwRUOFeW923qRquo'
+TOKEN = settings.main_bot_token
 
 bubbletype = 'asd'
 
@@ -75,10 +78,11 @@ def command_start(m):
     itembtn4 = types.KeyboardButton('/help')
     itembtn5 = types.KeyboardButton('/brandlist')
     itembtn6 = types.KeyboardButton('/recommendbrand')
-    itembtn7 = types.KeyboardButton('/statue')
+    itembtn7 = types.KeyboardButton('/status')
     itembtn8 = types.KeyboardButton('/faq')
     markup.add(itembtn1, itembtn2, itembtn3, itembtn4,
                itembtn5, itembtn6, itembtn7, itembtn8)
+    database.update_stage(m.chat.id, "start")
     bot.send_message(cid, "Welcome to Buyn", reply_markup=markup)
 
 
@@ -87,6 +91,7 @@ def command_start(m):
 @bot.message_handler(commands=['create'])
 def command_create(m):
     cid = m.chat.id
+    database.update_stage(m.chat.id, create)
     Customeritem[0] = cid
     print(Customeritem[0])
     bot.send_chat_action(cid, 'typing') 
@@ -380,6 +385,7 @@ def create_continue(message):
 @bot.message_handler(commands=['join'])
 def command_join(m):
     cid = m.chat.id
+    database.update_stage(m.chat.id, join)
     Joinitem[7] = cid
     bot.send_chat_action(cid, 'typing') 
     msg = bot.reply_to(
@@ -580,6 +586,7 @@ def join_continue(message):
 #ask for ptn
 @bot.message_handler(commands=['edit'])
 def command_edit(m):
+    database.update_stage(m.chat.id, edit)
     cid = m.chat.id
     Edititem[0] = cid
     bot.send_chat_action(cid, 'typing')
@@ -684,6 +691,7 @@ def edit_end(m):
 @bot.message_handler(commands=['faq'])
 def command_faq(m):
     cid = m.chat.id
+    database.update_stage(m.chat.id, 'faq')
     bot.send_chat_action(cid, 'typing')  # show the bot "typing" (max. 5 secs)
     bot.send_message(cid,
                      """Hello! Here is an exhaustive list of FAQ that our users have for us. Take a quick look!
@@ -713,6 +721,7 @@ You can have the option to extend your Cart’s waiting time or cancel your orde
 @bot.message_handler(commands=['brandlist'])
 def command_brandlist(m):
     cid = m.chat.id
+    database.update_stage(m.chat.id, 'brandList')
     bot.send_chat_action(cid, 'typing')  # show the bot "typing" (max. 5 secs)
     bot.send_message(cid,
                      """Current brands on Buyn and their minimum basket size to qualify for free shipping!
@@ -755,6 +764,7 @@ We hope this helps. If you have any further queries feel free to visit our /faq 
 def command_recommend(m):
     try:
         cid = m.chat.id
+        database.update_stage(m.chat.id, 'recommend')
         bot.send_chat_action(cid, 'typing')    
         msg = bot.reply_to(m, """Hey there! Please tell us your desired brand who is not currently on the platform.""")
         bot.register_next_step_handler(msg, recommend_input)
@@ -775,41 +785,42 @@ def recommend_input(m):
     except Exception as e:
         bot.reply_to(m, 'oooops')
 
-@bot.message_handler(commands=['statue'])
-def command_statue(m):
+@bot.message_handler(commands=['status'])
+def command_status(m):
     try:
         cid = m.chat.id
+        database.update_stage(m.chat.id, 'status')
         markup18 = types.ReplyKeyboardMarkup(row_width=1, one_time_keyboard=True)
         itembtn1 = types.KeyboardButton('Query your bubble')
-        itembtn2 = types.KeyboardButton('Query the bubble statue')
+        itembtn2 = types.KeyboardButton('Query the bubble status')
         itembtn3 = types.KeyboardButton('Query my items')
         itembtn4 = types.KeyboardButton('Query my address')
         markup18.add(itembtn1, itembtn2, itembtn3, itembtn4)
         msg = bot.reply_to(
             m, """What you want to query?""", reply_markup=markup18)
-        bot.register_next_step_handler(msg, statue_input)
+        bot.register_next_step_handler(msg, status_input)
     except Exception as e:
         bot.reply_to(m, 'oooops')
 
-def statue_input(m):
+def status_input(m):
     try:
         cid = m.chat.id
         if (m.text == 'Query your bubble'):
             msg = bot.reply_to(m, "Can i have your username?")
-            bot.register_next_step_handler(msg, statue_bubble)
-        elif(m.text == 'Query the bubble statue'):
+            bot.register_next_step_handler(msg, status_bubble)
+        elif(m.text == 'Query the bubble status'):
             msg = bot.reply_to(m, "Can i have your UCN?")
-            bot.register_next_step_handler(msg, statue_bubbleStatue)
+            bot.register_next_step_handler(msg, status_bubbleStatus)
         elif(m.text == 'Query my items'):
             msg = bot.reply_to(m, "Can i have your username?")
-            bot.register_next_step_handler(msg, statue_item)
+            bot.register_next_step_handler(msg, status_item)
         elif(m.text == 'Query my address'):
             msg = bot.reply_to(m, "Can i have your username?")
-            bot.register_next_step_handler(msg, statue_address)
+            bot.register_next_step_handler(msg, status_address)
     except Exception as e:
         bot.reply_to(m, 'oooops')
 
-def statue_bubble(m):
+def status_bubble(m):
     try:
         print(m.text)
         print(database.query_joined_bubbles(m.text))
@@ -823,7 +834,7 @@ def statue_bubble(m):
     except Exception as e:
         bot.reply_to(m, 'oooops')
 
-def statue_bubbleStatue(m):
+def status_bubbleStatus(m):
     try:
         print(m.text)
         retailer, currentAmount, neededAmount = database.query_bubble_status(m.text)
@@ -831,7 +842,7 @@ def statue_bubbleStatue(m):
         bot.send_message(m.chat.id, ("""Your current """+ retailer + """ cart is """ + str(currentAmount) + """/""" + str(neededAmount)))
     except Exception as e:
         bot.reply_to(m, 'oooops')       
-def statue_item(m):
+def status_item(m):
     try:
         print(m.text)
         print(database.query_items(m.text))
@@ -843,7 +854,7 @@ def statue_item(m):
         bot.send_message(m.chat.id, msg)
     except Exception as e:
         bot.reply_to(m, 'oooops')       
-def statue_address(m):
+def status_address(m):
     try:
         print(m.text)
         if (database.address_exist(m.text) == False):
@@ -882,5 +893,18 @@ bot.enable_save_next_step_handlers(delay=2)
 # WARNING It will work only if enable_save_next_step_handlers was called!
 bot.load_next_step_handlers()
 
+def signal_handler(signal, frame):
+    print('You pressed Ctrl+C!')
+    sys.exit(0)
 
-bot.polling()
+signal.signal(signal.SIGINT, signal_handler)
+print('Press Ctrl+C to exit')
+
+while True:
+    try:
+        print("Starting to poll:")
+        bot.polling(none_stop=False, interval=0, timeout=20)
+        print("polling worked")
+    except Exception as err:
+        print("Got error:")
+        print(err)
