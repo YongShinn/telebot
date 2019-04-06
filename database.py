@@ -444,13 +444,13 @@ def query_items(telegram_handle):
         print(err)
         return False
 
-def update_stage(telegram_handle, latest_stage):
+def update_stage(chat_id, latest_stage):
     try:
         c.execute('''UPDATE users SET latest_stage = %s 
-                    WHERE telegram_handle = %s''', (latest_stage, telegram_handle))
+                    WHERE chat_id = %s''', (latest_stage, chat_id))
         c.execute('''UPDATE users SET highest_stage = %s 
                     WHERE latest_stage > highest_stage 
-                    && telegram_handle = %s''', (latest_stage, telegram_handle))
+                    && chat_id = %s''', (latest_stage, chat_id))
         db.commit()
 
         print("update_stage successful")
@@ -531,7 +531,7 @@ add_retailer('Myprotein', 'MPT', 'https://www.myprotein.com.sg/', 100)
 
 #recommend_brand('Jonas', 'uniqlo')                            #telegram_handle, retailer
 
-#print(update_stage('timmydoc', 1))                            #telegram_handle, latest_stage
+#print(update_stage(1234, 1))                            #chat_id, latest_stage
 
 #print(address_exist('timmydoc'))                              #telegram_handle
 
